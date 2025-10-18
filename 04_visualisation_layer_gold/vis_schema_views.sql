@@ -142,3 +142,87 @@ DELIVERY_YEAR_LABEL
 FROM VIS_DELIVERY_SUMMARY
 GROUP BY DELIVERY_MONTH, DELIVERY_YEAR_LABEL;
 
+
+-----------------------------------------
+-- TOTAL REVENUE 2022 -------------
+-----------------------------------------
+CREATE OR REPLACE VIEW nova_db.nova_schema.revenue_2022 AS
+SELECT
+    order_date::date AS order_date,
+    total_price::number(10,2) AS total_price
+FROM fact_order
+WHERE EXTRACT(YEAR FROM order_date::date) = 2022;
+
+
+-----------------------------------------
+-- Revenue in 2023 compared with 2022 -------------
+-----------------------------------------
+
+CREATE OR REPLACE VIEW nova_db.nova_schema.revenue_2023 AS
+SELECT
+    order_date::date AS order_date,
+    total_price::number(10,2) AS total_price
+FROM fact_order
+WHERE EXTRACT(YEAR FROM order_date::date) = 2023;
+
+
+
+-----------------------------------------
+-- Revenue in 2024 compared with 2023 -------------
+-----------------------------------------
+
+
+CREATE OR REPLACE VIEW nova_db.nova_schema.revenue_2024 AS
+SELECT
+    order_date::date AS order_date,
+    total_price::number(10,2) AS total_price
+FROM fact_order
+WHERE EXTRACT(YEAR FROM order_date::date) = 2024;
+
+-----------------------------------------
+-- Stock Level (Top 5 Selling Product) -------------
+-----------------------------------------
+
+CREATE OR REPLACE VIEW NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS AS
+ WITH total_product_sales AS (
+ 	SELECT
+         product_name,                                  -- Product name
+     	SUM(total_units_sold) AS total_quantity_sold,  -- Total quantity sold across all years and states
+     	ROW_NUMBER() OVER (
+         	ORDER BY SUM(total_units_sold) DESC     	-- Rank by highest total quantity sold
+     	) AS product_rank
+ 	FROM
+         NOVA_VIS_DB.VIS_SCHEMA.VIS_PRODUCT_SALES_STATE
+ 	GROUP BY
+     	product_name
+ )
+
+------------------------------------------------------------
+-- Create a view that aggregates customer revenue and assigns
+-- each customer to a spending segment using percentile ranking.
+------------------------------------------------------------
+
+CREATE OR REPLACE VIEW V_CUSTOMER_REVENUE_SEGMENT AS
+SELECT 
+    c.CUSTOMER_ID,
+    c.CUS_NAME,
+
+    -- Calculate the total revenue per customer
+    ROUND(SUM(f.TOTAL_PRICE), 2) AS TOTAL_REVENUE,
+
+    -- Categorise customers by their spending percentile
+    CASE 
+        WHEN PERCENT_RANK() OVER (ORDER BY SUM(f.TOTAL_PRICE) DESC) <= 0.10 THEN 'Platinum'  -- Top 10% of customers
+        WHEN PERCENT_RANK() OVER (ORDER BY SUM(f.TOTAL_PRICE) DESC) <= 0.30 THEN 'Gold'      -- Next 20%
+        WHEN PERCENT_RANK() OVER (ORDER BY SUM(f.TOTAL_PRICE) DESC) <= 0.70 THEN 'Silver'    -- Next 40%
+        ELSE 'Bronze'                                                                       -- Bottom 30%
+    END AS REVENUE_SEGMENT
+
+FROM NOVA_DB.NOVA_SCHEMA.FACT_ORDER f
+
+-- Join FACT_ORDER with DIM_CUSTOMER to bring customer details
+JOIN NOVA_DB.NOVA_SCHEMA.DIM_CUSTOMER c
+    ON f.CUSTOMER_ID = c.CUSTOMER_ID
+
+-- Group by each customer to calculate total spending
+GROUP BY c.CUSTOMER_ID, c.CUS_NAME;
