@@ -1,3 +1,5 @@
+-- Dashboard
+
 -- ===============================================================
 -- ANALYSIS: Average yearly units (NSW + VIC) vs national average
 -- Description:
@@ -156,7 +158,9 @@ SELECT
 
 --Revenue by city in 2022 (AUD)
 
-
+USE ROLE NOVA_ROLE;
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.NOVA_SCHEMA;
 
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
@@ -167,7 +171,9 @@ GROUP BY c.city;
 
 --Revenue by city in 2023 (AUD)
 
-
+USE ROLE NOVA_ROLE;
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.NOVA_SCHEMA;
 
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
@@ -177,7 +183,9 @@ WHERE o.order_date BETWEEN '2023-01-01' AND '2023-12-31'
 GROUP BY c.city;
 
 --Revenue by city in 2024 (AUD)
-
+USE ROLE NOVA_ROLE;
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.NOVA_SCHEMA;
 
 
 SELECT  c.city, SUM(o.total_price)
@@ -190,17 +198,8 @@ GROUP BY c.city;
 
 --Stock Level (Top 5 Selling Product)
 
-SELECT
- 	'2022–2024' AS year_range,                          -- Static year column for labeling
- 	product_name,
- 	total_quantity_sold
- FROM
- 	total_product_sales
- WHERE
- 	product_rank <= 5                                   -- Only top 5 products
- ORDER BY
- 	product_rank;
- 
+SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS;
+
  
 --Stock Level (31 Dec 2024)
  
@@ -257,9 +256,7 @@ USE WAREHOUSE NOVA_WH;
 USE DATABASE NOVA_VIS_DB;
 USE SCHEMA VIS_SCHEMA;
 
-------------------------------------------------------------
--- Preview the resulting dataset to verify output
-------------------------------------------------------------
+
 SELECT * 
 FROM VIS_SCHEMA.V_CUSTOMER_REVENUE_SEGMENT;
 
@@ -353,9 +350,3 @@ SELECT
     round((100 * COUNT_IF(DELIVERY_TIME_DAYS <= 5) / COUNT(*)),2) || '%' AS ON_TIME_PERCENT
 FROM NOVA_DB.NOVA_SCHEMA.DIM_DELIVERY d
 where d.city != 'Sydney' and d.city != 'Melbourne';
-
-
-
-
-
-
