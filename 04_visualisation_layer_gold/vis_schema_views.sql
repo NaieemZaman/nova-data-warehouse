@@ -105,9 +105,8 @@ ORDER BY
 SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_SALE_EACH_STATE;
 ------------------------------------------------------------------
 
-
 -----------------------------------------
---3: CREATE GOLD VIEW TABLE FOR DELIVERY-------------
+--TABLE: CREATE GOLD TABLE FOR DELIVERY-------------
 -----------------------------------------
 
 USE DATABASE NOVA_VIS_DB;
@@ -122,10 +121,11 @@ SELECT DELIVERY_TIME_DAYS AS DELIVERY_TIME,
     STATE
 FROM NOVA_DB.NOVA_SCHEMA.DIM_DELIVERY;
 
+SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.Vis_delivery_SUMMARY;
 
-----------------------------------------------------
--- create view
------------------------------------------------------
+-----------------------------------------
+--VIEW: CREATE GOLD VIEW FOR DELIVERY-------------
+-----------------------------------------
 
 CREATE OR REPLACE VIEW V_DELIVERY_AREA AS
 SELECT AVG(DELIVERY_TIME) AS AVG_TIME,
@@ -134,7 +134,12 @@ SELECT AVG(DELIVERY_TIME) AS AVG_TIME,
 FROM VIS_DELIVERY_SUMMARY
 GROUP BY CITY, STATE;
 
---------------------------
+SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_DELIVERY_AREA;
+
+-----------------------------------------
+--VIEW: CREATE GOLD VIEW FOR DELIVERY-------------
+-----------------------------------------
+
 CREATE OR REPLACE VIEW V_DELIVERY_SEASON AS
 SELECT AVG(DELIVERY_TIME) AS AVG_TIME,
 DELIVERY_MONTH,
@@ -142,47 +147,38 @@ DELIVERY_YEAR_LABEL
 FROM VIS_DELIVERY_SUMMARY
 GROUP BY DELIVERY_MONTH, DELIVERY_YEAR_LABEL;
 
+SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_DELIVERY_SEASON;
 
------------------------------------------
--- TOTAL REVENUE 2022 -------------
------------------------------------------
-CREATE OR REPLACE VIEW nova_db.nova_schema.revenue_2022 AS
+
+----------------------------------------------------------------
+--TOTAL REVENUE 2022
+
+CREATE OR REPLACE VIEW nova_vis_db.vis_schema.revenue_2022 AS
 SELECT
     order_date::date AS order_date,
     total_price::number(10,2) AS total_price
-FROM fact_order
+FROM nova_db.nova_schema.fact_order
 WHERE EXTRACT(YEAR FROM order_date::date) = 2022;
 
 
------------------------------------------
--- Revenue in 2023 compared with 2022 -------------
------------------------------------------
-
-CREATE OR REPLACE VIEW nova_db.nova_schema.revenue_2023 AS
+--Revenue in 2023 compared with 2022
+CREATE OR REPLACE VIEW nova_vis_db.vis_schema.revenue_2023 AS
 SELECT
     order_date::date AS order_date,
     total_price::number(10,2) AS total_price
-FROM fact_order
+FROM nova_db.nova_schema.fact_order
 WHERE EXTRACT(YEAR FROM order_date::date) = 2023;
 
+-- Revenue in 2024 compared with 2023
 
-
------------------------------------------
--- Revenue in 2024 compared with 2023 -------------
------------------------------------------
-
-
-CREATE OR REPLACE VIEW nova_db.nova_schema.revenue_2024 AS
+CREATE OR REPLACE VIEW nova_vis_db.vis_schema.revenue_2024 AS
 SELECT
     order_date::date AS order_date,
     total_price::number(10,2) AS total_price
-FROM fact_order
+FROM nova_db.nova_schema.fact_order
 WHERE EXTRACT(YEAR FROM order_date::date) = 2024;
 
------------------------------------------
--- Stock Level (Top 5 Selling Product) -------------
------------------------------------------
-
+--Stock Level (Top 5 Selling Product)
 CREATE OR REPLACE VIEW NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS AS
  WITH total_product_sales AS (
  	SELECT
@@ -197,7 +193,46 @@ CREATE OR REPLACE VIEW NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS AS
      	product_name
  )
 
+-----------------------------------------------------------------
 ------------------------------------------------------------
+-- TOTAL REVENUE BY CUSTOMER SEGMENT
+------------------------------------------------------------
+-- Business Question:
+-- "Which customer segments (Platinum, Gold, Silver, Bronze)
+-- contribute the most to NovaShop’s total revenue?"
+
+-- Purpose:
+-- This view categorises customers based on their total spending
+-- and helps business teams identify high-value (Platinum/Gold)
+-- customers for loyalty and retention strategies.
+
+-- ---------------------------------------------------------
+-- Customer Segment Definitions:
+-- ---------------------------------------------------------
+-- Platinum: Top 10% of customers by total revenue
+--     → These are the most valuable customers — high spenders
+--       who contribute disproportionately to total revenue.
+--
+-- Gold: Next 20% (between 10%–30%)
+--     → Loyal and frequent buyers with above-average spending.
+--
+-- Silver: Next 40% (between 30%–70%)
+--     → Regular customers with moderate purchase value.
+--
+-- Bronze: Bottom 30% (below 70%)
+--     → Low-spend or occasional customers — often new or inactive.
+--
+-- These segments allow NovaShop to analyse customer behaviour
+-- and prioritise marketing, loyalty, and retention strategies.
+------------------------------------------------------------
+
+-- 1. Activate the compute warehouse
+USE WAREHOUSE NOVA_WH;
+
+-- 2. Set working database and schema for visualisation outputs
+USE DATABASE NOVA_VIS_DB;
+USE SCHEMA VIS_SCHEMA;
+ ------------------------------------------------------------
 -- Create a view that aggregates customer revenue and assigns
 -- each customer to a spending segment using percentile ranking.
 ------------------------------------------------------------
