@@ -5,8 +5,6 @@
 ----- - use TO_DATE and DATEDIFF to extract the date
 ----- - use SPLIT_PART to extract the address
 -----------------------------------------------
-
-USE DATABASE NOVA_DB;
 USE SCHEMA NOVA_SCHEMA;
 CREATE OR REPLACE TABLE DIM_DELIVERY AS
     SELECT RD.DELIVERY_ID,
@@ -34,7 +32,6 @@ UPDATE DIM_DELIVERY
 SET DELIVERY_YEAR_LABEL = TO_VARCHAR(DELIVERY_YEAR);
 
 
-
 -- ===============================================================
 -- TABLE: DIM_CUSTOMER
 
@@ -58,7 +55,11 @@ SELECT DISTINCT
     phone,
     email
 FROM nova_raw_db.oms_raw_schema.raw_order;
+
+
+-- ===============================================================
 -- DIM_PRODUCT
+-- ===============================================================
 
 CREATE OR REPLACE TABLE NOVA_DB.NOVA_SCHEMA.DIM_PRODUCT AS
 SELECT 
@@ -111,6 +112,7 @@ SELECT
     product_id,
     CAST(total_price AS NUMBER(10,2)),                  -- Convert total_price to decimal with 2 digits
 FROM nova_raw_db.oms_raw_schema.raw_order;
+
 
 
 
