@@ -126,40 +126,39 @@ WHERE delivery_state = 'NSW';
 SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_SALE_EACH_STATE
 WHERE delivery_state = 'VIC';
 
-
+----------------------------------------------------------------
 --TOTAL REVENUE 2022
-
 
 SELECT SUM(v.total_price),
 ROUND(SUM(v.total_price)/sum(v.total_price)) as pct_act
-from revenue_2022 as v;
+from nova_vis_db.vis_schema.revenue_2022 as v;
 
 
 --Revenue in 2023 compared with 2022
 SELECT
-  (SELECT SUM(total_price) FROM revenue_2022) AS total_revenue_2022,
-  (SELECT SUM(total_price) FROM revenue_2023) AS total_revenue_2023,
+  (SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2022) AS total_revenue_2022,
+  (SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2023) AS total_revenue_2023,
   ROUND(
-    (SELECT SUM(total_price) FROM revenue_2023)
-    / NULLIF((SELECT SUM(total_price) FROM revenue_2022), 0), 2) AS pct_act;
+    (SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2023)
+    / NULLIF((SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2022), 0), 2) AS pct_act;
 
-Revenue in 2024 compared with 2023
+
+-- Revenue in 2024 compared with 2023
 
 SELECT
-  (SELECT SUM(total_price) FROM revenue_2024) AS total_revenue_2024,
-  (SELECT SUM(total_price) FROM revenue_2023) AS total_revenue_2023,
+  (SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2024) AS total_revenue_2024,
+  (SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2023) AS total_revenue_2023,
   ROUND(
-    (SELECT SUM(total_price) FROM revenue_2024)
-    / NULLIF((SELECT SUM(total_price) FROM revenue_2023), 0), 2) AS pct_act;
+    (SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2024)
+    / NULLIF((SELECT SUM(total_price) FROM nova_vis_db.vis_schema.revenue_2023), 0), 2) AS pct_act;
+
+
 
 --Revenue by city in 2022 (AUD)
 
 USE ROLE NOVA_ROLE;
-CREATE WAREHOUSE IF NOT EXISTS NOVA_WH INITIALLY_SUSPENDED=TRUE;
 USE WAREHOUSE NOVA_WH;
 USE SCHEMA NOVA_DB.NOVA_SCHEMA;
-
-
 
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
@@ -170,6 +169,10 @@ GROUP BY c.city;
 
 --Revenue by city in 2023 (AUD)
 
+USE ROLE NOVA_ROLE;
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.NOVA_SCHEMA;
+
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
 JOIN FACT_Order AS o
@@ -178,6 +181,10 @@ WHERE o.order_date BETWEEN '2023-01-01' AND '2023-12-31'
 GROUP BY c.city;
 
 --Revenue by city in 2024 (AUD)
+USE ROLE NOVA_ROLE;
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.NOVA_SCHEMA;
+
 
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
@@ -202,14 +209,23 @@ SELECT
  
  
 --Stock Level (31 Dec 2024)
+ 
+USE ROLE NOVA_ROLE;
+-- INITIALLY_s
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.nova_schema;
+ 
 
-
+USE WAREHOUSE NOVA_WH;
+USE SCHEMA NOVA_DB.nova_schema;
+ 
 select quantity, product_name
 from dim_product
 where quantity <=10;
 
----------------------------LOAN---------------------------------
--- VISUALISATION 1: TOTAL REVENUE BY CUSTOMER SEGMENT
+-----------------------------------------------------------------
+------------------------------------------------------------
+-- TOTAL REVENUE BY CUSTOMER SEGMENT
 ------------------------------------------------------------
 -- Business Question:
 -- "Which customer segments (Platinum, Gold, Silver, Bronze)
@@ -239,6 +255,15 @@ where quantity <=10;
 -- These segments allow NovaShop to analyse customer behaviour
 -- and prioritise marketing, loyalty, and retention strategies.
 ------------------------------------------------------------
+
+-- 1. Activate the compute warehouse
+USE WAREHOUSE NOVA_WH;
+
+-- 2. Set working database and schema for visualisation outputs
+USE DATABASE NOVA_VIS_DB;
+USE SCHEMA VIS_SCHEMA;
+
+------------------------------------------------------------
 -- Preview the resulting dataset to verify output
 ------------------------------------------------------------
 SELECT * 
@@ -257,6 +282,13 @@ FROM VIS_SCHEMA.V_CUSTOMER_REVENUE_SEGMENT;
 -- marketing, rewards, or retention programs.
 
 ------------------------------------------------------------
+
+-- 1. Reconfirm warehouse and schema (best practice)
+USE WAREHOUSE NOVA_WH;
+USE DATABASE NOVA_VIS_DB;
+USE SCHEMA VIS_SCHEMA;
+
+------------------------------------------------------------
 -- Select top 20 customers based on total revenue
 ------------------------------------------------------------
 SELECT 
@@ -269,11 +301,17 @@ ORDER BY TOTAL_REVENUE DESC   -- Rank by descending revenue
 LIMIT 20;                     -- Return only top 20 customers
 
 
+
+
+
 -- Visualization for LOGISTIC USE CASES —-------
 
 ---- a) Average Delivery Time by City---------------
 ----Goal: Identify which cities have slower or faster delivery times.--------
+-----------------------------------------------------
 
+USE DATABASE NOVA_VIS_DB;
+USE SCHEMA VIS_SCHEMA;
 
 SELECT * FROM V_DELIVERY_AREA;
 
@@ -321,13 +359,6 @@ SELECT
     round((100 * COUNT_IF(DELIVERY_TIME_DAYS <= 5) / COUNT(*)),2) || '%' AS ON_TIME_PERCENT
 FROM NOVA_DB.NOVA_SCHEMA.DIM_DELIVERY d
 where d.city != 'Sydney' and d.city != 'Melbourne';
-
-
-
-
-
-
-
 
 
 
