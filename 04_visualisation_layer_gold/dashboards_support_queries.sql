@@ -156,9 +156,7 @@ SELECT
 
 --Revenue by city in 2022 (AUD)
 
-USE ROLE NOVA_ROLE;
-USE WAREHOUSE NOVA_WH;
-USE SCHEMA NOVA_DB.NOVA_SCHEMA;
+
 
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
@@ -169,9 +167,7 @@ GROUP BY c.city;
 
 --Revenue by city in 2023 (AUD)
 
-USE ROLE NOVA_ROLE;
-USE WAREHOUSE NOVA_WH;
-USE SCHEMA NOVA_DB.NOVA_SCHEMA;
+
 
 SELECT  c.city, SUM(o.total_price)
 FROM DIM_DELIVERY AS c
@@ -181,9 +177,7 @@ WHERE o.order_date BETWEEN '2023-01-01' AND '2023-12-31'
 GROUP BY c.city;
 
 --Revenue by city in 2024 (AUD)
-USE ROLE NOVA_ROLE;
-USE WAREHOUSE NOVA_WH;
-USE SCHEMA NOVA_DB.NOVA_SCHEMA;
+
 
 
 SELECT  c.city, SUM(o.total_price)
@@ -359,6 +353,7 @@ SELECT
     round((100 * COUNT_IF(DELIVERY_TIME_DAYS <= 5) / COUNT(*)),2) || '%' AS ON_TIME_PERCENT
 FROM NOVA_DB.NOVA_SCHEMA.DIM_DELIVERY d
 where d.city != 'Sydney' and d.city != 'Melbourne';
+
 
 
 
