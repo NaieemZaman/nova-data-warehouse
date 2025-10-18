@@ -1,6 +1,3 @@
--- Dashboard
-
-
 -- ===============================================================
 -- ANALYSIS: Average yearly units (NSW + VIC) vs national average
 -- Description:
@@ -438,6 +435,7 @@ SELECT
     round((100 * COUNT_IF(DELIVERY_TIME_DAYS <= 5) / COUNT(*)),2) || '%' AS ON_TIME_PERCENT
 FROM NOVA_DB.NOVA_SCHEMA.DIM_DELIVERY d
 where d.city != 'Sydney' and d.city != 'Melbourne';
+
 
 
 
