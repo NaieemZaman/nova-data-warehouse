@@ -1,3 +1,5 @@
+-- GOLD LAYER
+
 -- ===============================================================
 -- TABLE: VIS_PRODUCT_SALES_STATE
 
@@ -169,6 +171,7 @@ SELECT
 FROM nova_db.nova_schema.fact_order
 WHERE EXTRACT(YEAR FROM order_date::date) = 2023;
 
+
 -- Revenue in 2024 compared with 2023
 
 CREATE OR REPLACE VIEW nova_vis_db.vis_schema.revenue_2024 AS
@@ -177,6 +180,12 @@ SELECT
     total_price::number(10,2) AS total_price
 FROM nova_db.nova_schema.fact_order
 WHERE EXTRACT(YEAR FROM order_date::date) = 2024;
+
+
+SELECT * FROM nova_vis_db.vis_schema.revenue_2022;
+SELECT * FROM nova_vis_db.vis_schema.revenue_2023;
+SELECT * FROM nova_vis_db.vis_schema.revenue_2024;
+
 
 --Stock Level (Top 5 Selling Product)
 CREATE OR REPLACE VIEW NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS AS
@@ -191,7 +200,9 @@ CREATE OR REPLACE VIEW NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS AS
          NOVA_VIS_DB.VIS_SCHEMA.VIS_PRODUCT_SALES_STATE
  	GROUP BY
      	product_name
- )
+ );
+
+SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_BESTSELLERS_AUS_ALL_YEARS;
 
 -----------------------------------------------------------------
 ------------------------------------------------------------
@@ -261,3 +272,5 @@ JOIN NOVA_DB.NOVA_SCHEMA.DIM_CUSTOMER c
 
 -- Group by each customer to calculate total spending
 GROUP BY c.CUSTOMER_ID, c.CUS_NAME;
+
+SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_CUSTOMER_REVENUE_SEGMENT;
