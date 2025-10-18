@@ -62,9 +62,8 @@ SELECT * FROM NOVA_VIS_DB.VIS_SCHEMA.V_TOTAL_SALES;
 -- ===============================================================
 -- TABLE: V_SALE_EACH_STATE (VIEW)
 
--- This view displays the top 5 best-selling products by state (NSW, VIC) and year.
+-- This view displays the top 3 best-selling products by state (NSW, VIC) and year.
 -- Uses ROW_NUMBER() to rank products per state and year by total quantity sold.
--- Filters only the top 5 products per state and year.
 -- Useful for identifying popular products in key regions.
 -- ===============================================================
 
@@ -142,3 +141,4 @@ DELIVERY_MONTH,
 DELIVERY_YEAR_LABEL
 FROM VIS_DELIVERY_SUMMARY
 GROUP BY DELIVERY_MONTH, DELIVERY_YEAR_LABEL;
+
